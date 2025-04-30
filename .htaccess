@@ -1,0 +1,73 @@
+
+<IfModule mod_rewrite.c>
+RewriteEngine on
+
+RewriteRule ^home$ index.php [L]
+RewriteRule ^daftar$  index.php?page=daftar [L] 
+RewriteRule ^keluar$  logout.php [L] 
+RewriteRule ^daftar-akun$ index.php?page=daftarakun [L]
+RewriteRule ^admin/login$ admin/login.php [L]
+RewriteRule ^admin/keluar$ admin/logout.php [L]
+RewriteRule ^admin/home$ admin/dashboard.php [L]
+RewriteRule ^admin/dashboard$ admin/dashboard.php [L]
+
+RewriteRule ^admin/data-siswa$ admin/index.php?module=siswa&act=view [L]
+RewriteRule ^admin/hapussiswa-(.*)$ admin/index.php?module=siswa&act=delete&id_siswa=$1 [L]
+
+RewriteRule ^admin/data-sekolah$ admin/index.php?module=sekolah&act=view [L]
+RewriteRule ^admin/edit-sekolah(.*)$ admin/index.php?module=sekolah&act=edit&id_sekolah=$1 [L]
+RewriteRule ^admin/tambah-sekolah$ admin/index.php?module=sekolah&act=add [L]
+RewriteRule ^admin/hapus-sekolah(.*)$ admin/index.php?module=sekolah&act=hapus&id_sekolah=$1 [L]
+
+RewriteRule ^admin/data-jadwal$ admin/index.php?module=jadwal&act=view [L]
+RewriteRule ^admin/edit-jadwal(.*)$ admin/index.php?module=jadwal&act=edit&id_jadwal=$1 [L]
+RewriteRule ^admin/tambah-jadwal$ admin/index.php?module=jadwal&act=add [L]
+RewriteRule ^admin/hapus-jadwal(.*)$ admin/index.php?module=jadwal&act=delete&id_jadwal=$1 [L]
+
+RewriteRule ^admin/data-jalurspmb$ admin/index.php?module=jalurppdb&act=view [L]
+RewriteRule ^admin/edit-jalurspmb(.*)$ admin/index.php?module=jalurppdb&act=edit&id_jalurppdb=$1 [L]
+RewriteRule ^admin/tambah-jalurspmb$ admin/index.php?module=jalurppdb&act=add [L]
+RewriteRule ^admin/hapus-jalurspmb(.*)$ admin/index.php?module=jalurppdb&act=hapus&id_jalurppdb=$1 [L]
+
+RewriteRule ^admin/data-jurusan$ admin/index.php?module=jurusan&act=view [L]
+RewriteRule ^admin/datajurusan$ admin/index.php?module=jurusan&act=view1 [L]
+RewriteRule ^admin/edit-jurusan(.*)$ admin/index.php?module=jurusan&act=edit&id_jurusan=$1 [L]
+RewriteRule ^admin/tambah-jurusan$ admin/index.php?module=jurusan&act=add [L]
+RewriteRule ^admin/tambahjurusan$ admin/index.php?module=jurusan&act=add1 [L]
+RewriteRule ^admin/hapus-jurusan(.*)$ admin/index.php?module=jurusan&act=hapus&id_jurusan=$1 [L]
+
+RewriteRule ^admin/data-kab$ admin/index.php?module=kab&act=view [L]
+RewriteRule ^admin/edit-kab(.*)$ admin/index.php?module=kab&act=edit&id_kab=$1 [L]
+RewriteRule ^admin/tambah-kab$ admin/index.php?module=kab&act=add [L]
+RewriteRule ^admin/hapus-kab(.*)$ admin/index.php?module=kab&act=hapus&id_kab=$1 [L]
+
+RewriteRule ^admin/data-kec$ admin/index.php?module=kec&act=view [L]
+RewriteRule ^admin/edit-kec(.*)$ admin/index.php?module=kec&act=edit&id_kec=$1 [L]
+RewriteRule ^admin/tambah-kec$ admin/index.php?module=kec&act=add [L]
+RewriteRule ^admin/hapus-kec(.*)$ admin/index.php?module=kec&act=hapus&id_kec=$1 [L]
+
+RewriteRule ^admin/data-kel$ admin/index.php?module=kel&act=view [L]
+RewriteRule ^admin/edit-kel(.*)$ admin/index.php?module=kel&act=edit&id_kel=$1 [L]
+RewriteRule ^admin/tambah-kel$ admin/index.php?module=kel&act=add [L]
+RewriteRule ^admin/hapus-kel(.*)$ admin/index.php?module=kel&act=hapus&id_kel=$1 [L]
+
+RewriteRule ^admin/data-domisili$ admin/index.php?module=zonasi&act=view [L]
+RewriteRule ^admin/edit-domisili(.*)$ admin/index.php?module=zonasi&act=edit&id_zonasi=$1 [L]
+RewriteRule ^admin/tambah-domisili$ admin/index.php?module=zonasi&act=add [L]
+RewriteRule ^admin/hapus-domisili(.*)$ admin/index.php?module=zonasi&act=hapus&id_zonasi=$1 [L]
+
+RewriteRule ^admin/data-sekolah$ admin/index.php?module=sekolah&act=view [L]
+RewriteRule ^admin/edit-sekolah(.*)$ admin/index.php?module=sekolah&act=edit&id_sekolah=$1 [L]
+RewriteRule ^admin/tambah-sekolah$ admin/index.php?module=sekolah&act=add [L]
+RewriteRule ^admin/hapus-sekolah(.*)$ admin/index.php?module=sekolah&act=hapus&id_sekolah=$1 [L]
+
+RewriteRule ^admin/dataspmb$ admin/index.php?module=datappdb&act=view1 [L]
+RewriteRule ^admin/data-ppdb$ admin/index.php?module=datappdb&act=view [L]
+RewriteRule ^admin/data-spmb$ admin/index.php?module=dataspmb&act=view [L]
+RewriteRule ^admin/detail-spmb-(.*)$ admin/index.php?module=dataspmb&act=view1&id=$1 [L]
+RewriteRule ^admin/datappdb-hapus-(.*)$ admin/index.php?module=datappdb&act=delete&id_datappdb=$1 [L]
+
+RewriteRule ^admin/jadwal-spmb$ admin/index.php?module=jadwal&act=view [L]
+
+
+</IfModule>

@@ -1,0 +1,2057 @@
+<?php 
+	
+class config {
+
+public $db;
+	
+/* Fungsi koneksi */
+
+
+	function __construct()
+	{
+		$server		= "localhost";
+		$user		= "root";
+		$password	= "";
+		$dbname		="db_penerimaantamu";		 
+		$this->db = new mysqli($server, $user, $password, $dbname);
+	}
+ 
+
+
+	function login ($username,$password){
+	$password = md5($password);
+	$query = "SELECT * from data_admin where username ='$username' and password = '$password'";
+	$res	  = $this->db->query($query);
+	$row      = mysqli_num_rows($res);
+
+	if ($row ==1){
+		session_start();
+		$res2 =$this->db->query($query);
+		$res2 = mysqli_fetch_assoc($res2);
+		$_SESSION['username'] = $res2['username'];
+		$_SESSION['password'] = $res2['password'];
+		$_SESSION['nama_lengkap'] = $res2['nama_lengkap'];
+		$_SESSION['email'] = $res2['email'];
+		$_SESSION['level'] = $res2['level'];
+		$_SESSION['foto'] = $res2['foto'];
+		$_SESSION['id_admin'] = $res2['id_admin'];
+		$sid_lama = session_id();
+	  session_regenerate_id();
+    	$sid_baru = session_id();
+    	$res1	  = $this->db->query("UPDATE data_admin SET id_session='$sid_baru' WHERE username='$username'");
+		header('location:index.php');
+	}else{
+		header('location:login.php?msg=wrong');
+	} 
+}
+
+//ganti pass admin
+	function ganti_pass($id_admin){
+	$sql = "SELECT password FROM data_admin WHERE id_admin = '$id_admin'";
+	$res = $this->db->query($sql);
+	return $res;
+	}
+
+//Update pass pemilik	
+	function update_pass($id_admin,$username,$password,$nama_lengkap,$email,$foto,$level){
+		$password1=md5($password);
+	$query = "UPDATE data_admin SET username = '$username',
+			password ='$password1',pass_asli ='$password',nama_lengkap ='$nama_lengkap', email ='$email',foto ='$foto',level ='$level' 
+			where id_admin ='$id_admin'";
+	$res = $this->db->query($query);
+	return $res;
+	}
+
+// method tampil data admin
+	function tampil_dataadmin(){
+	$query 	= "SELECT * FROM data_admin order by id_admin";
+	$result = $this->db->query($query);
+	return $result; 
+	}
+
+// method detail data admin
+	function detail_dataadmin($id_admin){
+	$query 	= "SELECT * FROM data_admin where id_admin='$id_admin'";
+	$result = $this->db->query($query);
+	return $result; 
+	}	
+
+// method edit data admin
+	function input_dataadmin($username,$password,$nama_lengkap,$email,$foto,$level){
+	$password1 = md5($password);
+	$query 	= "INSERT INTO data_admin VALUES (NULL,'$username','$password1','$password','$nama_lengkap','$email','$foto','$level',NULL)";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+// method hapus data admin
+	function delete_dataadmin($id_admin){
+	$query 	= "DELETE FROM data_admin where id_admin= $id_admin";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+
+//Data layanan
+// method tampil data layanan
+function tampil_layanan(){
+	$query 	= "SELECT * FROM tb_layanan order by 'id_layanan' desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data layanan
+	function detail_layanan($id_layanan){
+	$query 	= "SELECT * FROM tb_layanan where id_layanan='$id_layanan'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+	
+
+// method hapus data layanan
+	function delete_layanan($id_layanan){
+	$query 	= "DELETE FROM tb_layanan where id_layanan='$id_layanan'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data layanan
+	function input_layanan($nama_layanan){
+	$sql 	= "INSERT INTO tb_layanan VALUES (NULL,'$nama_layanan')";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data layanan
+	function update_layanan($id_layanan,$nama_layanan){
+	$query = "UPDATE tb_layanan SET 
+									nama_layanan	='$nama_layanan'
+									where id_layanan = '$id_layanan'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+
+//Data sublayanan
+// method tampil data sublayanan
+function tampil_sublayanan($id_layanan){
+	$query 	= "SELECT * FROM tb_sublayanan inner join tb_layanan on tb_sublayanan.id_layanan=tb_layanan.id_layanan where tb_sublayanan.id_layanan='$id_layanan' order by 'tb_sublayanan.id_sublayanan' desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data sublayanan
+	function detail_sublayanan($id_sublayanan){
+	$query 	= "SELECT * FROM tb_sublayanan inner join tb_layanan on tb_sublayanan.id_layanan=tb_layanan.id_layanan where tb_sublayanan.id_sublayanan='$id_sublayanan'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+	
+
+// method hapus data sublayanan
+	function delete_sublayanan($id_sublayanan){
+	$query 	= "DELETE FROM tb_sublayanan where id_sublayanan='$id_sublayanan'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data sublayanan
+	function input_sublayanan($id_layanan,$nama_sublayanan,$module){
+	$sql 	= "INSERT INTO tb_sublayanan VALUES (NULL,'$id_layanan','$nama_sublayanan','$module')";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data sublayanan
+	function update_sublayanan($id_sublayanan,$id_layanan,$nama_sublayanan,$module){
+	$query = "UPDATE tb_sublayanan SET 
+									id_layanan		='$id_layanan',
+									nama_sublayanan	='$nama_sublayanan',
+									module			='$module'
+									where id_sublayanan = '$id_sublayanan'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+//Data bukutamu
+// method tampil data bukutamu
+function tampil_bukutamu(){
+	$query 	= "SELECT * FROM tb_bukutamu inner join tb_tamu on tb_bukutamu.id_tamu=tb_tamu.id_tamu inner join tb_sublayanan on tb_bukutamu.id_sublayanan=tb_sublayanan.id_sublayanan inner join tb_layanan on tb_layanan.id_layanan=tb_sublayanan.id_layanan order by tb_bukutamu.id_bukutamu desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+
+function jumlah_bukutamu(){
+	$query 	= "SELECT count(*) as jumlah_tamu FROM tb_bukutamu";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+function tamu_hariini(){
+	$tgl = date("Y-m-d");
+	$query 	= "SELECT count(*) as tamu FROM tb_bukutamu where tgl_tamu='$tgl'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+function grafik_tamu(){
+	$query 	= "SELECT MONTH(tgl_tamu) as bulan, count(*) as jumlah FROM tb_bukutamu GROUP BY MONTH(tgl_tamu)";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data bukutamu
+	function detail_bukutamu($id_bukutamu){
+	$query 	= "SELECT * FROM tb_bukutamu inner join tb_tamu on tb_bukutamu.id_tamu=tb_tamu.id_tamu inner join tb_sublayanan on tb_bukutamu.id_sublayanan=tb_sublayanan.id_sublayanan inner join tb_layanan on tb_sublayanan.id_layanan=tb_layanan.id_layanan where tb_bukutamu.id_bukutamu='$id_bukutamu'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data bukutamu
+	function detail_bukutamu1($id_layanan){
+	$query 	= "SELECT MONTH(tb_bukutamu.tgl_tamu), count(*) as jumlah FROM `tb_bukutamu` inner join tb_sublayanan on tb_bukutamu.id_sublayanan=tb_sublayanan.id_sublayanan where tb_sublayanan.id_layanan='$id_layanan' GROUP BY MONTH(tb_bukutamu.tgl_tamu)";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+	
+
+// method hapus data bukutamu
+	function delete_bukutamu($id_bukutamu){
+	$query 	= "DELETE FROM tb_bukutamu where id_bukutamu='$id_bukutamu'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data bukutamu
+	function input_bukutamu($id_tamu,$id_sublayanan,$id_pegawai,$tgl_tamu){
+	$sql 	= "INSERT INTO tb_bukutamu VALUES (NULL,'$id_tamu','$id_sublayanan','$id_pegawai','$tgl_tamu')";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data bukutamu
+	function update_bukutamu($id_bukutamu,$id_tamu,$id_sublayanan,$id_pegawai,$tgl_tamu){
+	$query = "UPDATE tb_bukutamu SET 
+									id_tamu 		='$id_tamu',
+									id_sublayanan	='$id_sublayanan',
+									id_pegawai		='$id_pegawai',
+									tgl_tamu		='$tgl_tamu'
+									where id_bukutamu = '$id_bukutamu'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+
+
+//Data tamu
+// method tampil data tamu
+function tampil_tamu(){
+	$query 	= "SELECT * FROM tb_tamu order by tb_tamu.id_tamu desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+
+// method detail data tamu
+	function detail_tamu($id_tamu){
+	$query 	= "SELECT * FROM tb_tamu where tb_tamu.id_tamu='$id_tamu'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+	
+
+// method hapus data tamu
+	function delete_tamu($id_tamu){
+	$query 	= "DELETE FROM tb_tamu where id_tamu='$id_tamu'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data tamu
+	function input_tamu($nama,$nip_nrp,$jabatan_tamu,$alamat,$no_telp,$email,$instansi){
+	$sql 	= "INSERT INTO tb_tamu VALUES (NULL,'$nama','$nip_nrp','$jabatan_tamu','$alamat','$no_telp','$email','$instansi')";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data tamu
+	function update_tamu($id_tamu,$nama,$nip_nrp,$jabatan_tamu,$alamat,$no_telp,$email,$instansi){
+	$query = "UPDATE tb_tamu SET 
+									nama_tamu		='$nama',
+									nip_nrp			='$nip_nrp',
+									jabatan_tamu	='$jabatan_tamu',
+									alamat			='$alamat',
+									no_telp			='$no_telp',
+									email			='$email',
+									instansi		='$instansi'
+									where id_tamu = '$id_tamu'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+
+
+//Data pegawai
+// method tampil data pegawai
+function tampil_pegawai(){
+	$query 	= "SELECT * FROM tb_pegawai order by 'id_pegawai' desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+//Data pegawai
+// method tampil data pegawai
+function tampil_pegawai4(){
+	$query 	= "SELECT count(*) as jumlah_semua,(select count(*) from tb_pegawai where jenjang_pendidikan like '%S3%') as jumlah_s3, (select count(*) from tb_pegawai where jenjang_pendidikan like '%S1%') as jumlah_s1, (select count(*) from tb_pegawai where jenjang_pendidikan like '%S2%') as jumlah_s2, (select count(*) from tb_pegawai where jenjang_pendidikan like '%D3%') as jumlah_d3 FROM `tb_pegawai`";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+//Data pegawai
+// method tampil data pegawai
+function tampil_pegawai3(){
+	$query 	= "SELECT count(*) as jumlah_semua, (select count(*) from tb_ppnpn where pend_terakhir like '%S1%') as jumlah_s1, (select count(*) from tb_ppnpn where pend_terakhir like '%D3%') as jumlah_d3, (select count(*) from tb_ppnpn where pend_terakhir like '%SMA%' or pend_terakhir like '%SMK%' or pend_terakhir like '%SMEA%' or pend_terakhir like '%MA%') as jumlah_sma FROM `tb_ppnpn`";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data pegawai
+	function detail_pegawai($id_pegawai){
+	$query 	= "SELECT * FROM tb_pegawai where id_pegawai='$id_pegawai'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data pegawai
+	function detail_pegawai13($nip_pegawai){
+	$query 	= "SELECT * FROM tb_pegawai where NIP='$nip_pegawai'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+	
+
+// method hapus data pegawai
+	function delete_pegawai($id_pegawai){
+	$query 	= "DELETE FROM tb_pegawai where id_pegawai='$id_pegawai'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data pegawai
+	function input_pegawai($nama,$tgl_lahir,$jenis_kelamin,$NIP,$pangkat_gol,$pangkat_tmt,$jabatan,$unit_kerja,$kuota_cuti,$ket,$password,$pass_asli){
+	$sql 	= "INSERT INTO tb_pegawai VALUES (NULL,'$nama','$tgl_lahir','$jenis_kelamin','$NIP','$pangkat_gol','$pangkat_tmt','$jabatan','$unit_kerja','$kuota_cuti','$ket','$password','$pass_asli')";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data pegawai
+	function update_pegawai($id_pegawai,$nama,$tgl_lahir,$jenis_kelamin,$NIP,$pangkat_gol,$pangkat_tmt,$jabatan,$unit_kerja,$ket,$password,$pass_asli){
+	$query = "UPDATE tb_pegawai SET 
+									nama_pegawai	='$nama',
+									tgl_lahir		='$tgl_lahir',
+									jenis_kelamin	='$jenis_kelamin',
+									NIP				='$NIP',
+									pangkat_gol		='$pangkat_gol',
+									pangkat_tmt		='$pangkat_tmt',
+									jabatan			='$jabatan',
+									unit_kerja		='$unit_kerja',
+									password		='$password',
+									pass_asli		='$pass_asli',
+									ket				='$ket'
+									where id_pegawai = '$id_pegawai'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+//Data sarpras
+// method tampil data sarpras
+function tampil_sarpras(){
+	$query 	= "SELECT * FROM tb_sarpras order by 'id_sarpras' desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data sarpras
+	function detail_sarpras($id_sarpras){
+	$query 	= "SELECT * FROM tb_sarpras where id_sarpras='$id_sarpras'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+	
+
+// method hapus data sarpras
+	function delete_sarpras($id_sarpras){
+	$query 	= "DELETE FROM tb_sarpras where id_sarpras='$id_sarpras'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data sarpras
+	function input_sarpras($nama_sarpras){
+	$sql 	= "INSERT INTO tb_sarpras VALUES (NULL,'$nama_sarpras')";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data sarpras
+	function update_sarpras($id_sarpras,$nama_sarpras){
+	$query = "UPDATE tb_sarpras SET 
+									nama_sarpras	='$nama_sarpras'
+									where id_sarpras = '$id_sarpras'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+
+//Data komsarpras
+// method tampil data komsarpras
+	function tampil_komsarpras($id_sarpras){
+	$query 	= "SELECT *, (select count(tb_inventaris.id_inventaris) from tb_inventaris where tb_inventaris.id_komsarpras=tb_komsarpras.id_komsarpras and tb_inventaris.status='Maintenance') as maintenance, (select count(tb_inventaris.id_inventaris) from tb_inventaris where tb_inventaris.id_komsarpras=tb_komsarpras.id_komsarpras and tb_inventaris.status='Ready') as ready FROM tb_komsarpras inner join tb_sarpras on tb_komsarpras.id_sarpras=tb_sarpras.id_sarpras where tb_komsarpras.id_sarpras='$id_sarpras' order by tb_komsarpras.id_komsarpras desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+	function cek_komsarpras($mulai,$sampai){
+	$query 	= "SELECT * FROM tb_komsarpras where id_komsarpras not in (SELECT id_komsarpras from tb_peminjamandetail inner join tb_peminjaman on tb_peminjamandetail.id_bukutamu=tb_peminjaman.id_bukutamu where '$mulai' between CAST(tb_peminjaman.mulai AS DATE) and CAST(tb_peminjaman.sampai AS DATE) or '$sampai' between CAST(tb_peminjaman.mulai AS DATE) and CAST(tb_peminjaman.sampai AS DATE))";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+	function tampil_komsarpras1(){
+	$query 	= "SELECT * FROM tb_komsarpras inner join tb_sarpras on tb_komsarpras.id_sarpras=tb_sarpras.id_sarpras order by tb_komsarpras.id_komsarpras asc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+//Data komsarpras
+// method tampil data komsarpras
+	function tampil_komsarprasbmn(){
+	$query 	= "SELECT * FROM tb_komsarpras inner join tb_sarpras on tb_komsarpras.id_sarpras=tb_sarpras.id_sarpras where tb_komsarpras.id_sarpras='3' order by 'tb_komsarpras.id_komsarpras' desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data komsarpras
+	function detail_komsarpras($id_komsarpras){
+	$query 	= "SELECT * FROM tb_komsarpras inner join tb_sarpras on tb_komsarpras.id_sarpras=tb_sarpras.id_sarpras where tb_komsarpras.id_komsarpras='$id_komsarpras'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+	
+
+// method hapus data komsarpras
+	function delete_komsarpras($id_komsarpras){
+	$query 	= "DELETE FROM tb_komsarpras where id_komsarpras='$id_komsarpras'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data komsarpras
+	function input_komsarpras($id_sarpras,$nama_komsarpras,$kapasitas,$tarif){
+	$sql 	= "INSERT INTO tb_komsarpras VALUES (NULL,'$id_sarpras','$nama_komsarpras','$kapasitas','$tarif')";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data komsarpras
+	function update_komsarpras($id_komsarpras,$id_sarpras,$nama_komsarpras,$kapasitas,$tarif){
+	$query = "UPDATE tb_komsarpras SET 
+									id_sarpras		='$id_sarpras',
+									nama_komsarpras	='$nama_komsarpras',
+									kapasitas		='$kapasitas',
+									tarif			='$tarif'
+									where id_komsarpras = '$id_komsarpras'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+
+//Data inventaris
+// method tampil data inventaris
+	function tampil_inventaris($id_komsarpras){
+	$query 	= "SELECT * FROM tb_inventaris inner join tb_komsarpras on tb_inventaris.id_komsarpras=tb_komsarpras.id_komsarpras inner join tb_sarpras on tb_komsarpras.id_sarpras=tb_sarpras.id_sarpras where tb_inventaris.id_komsarpras='$id_komsarpras' order by tb_inventaris.id_inventaris desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+	function tampil_inventaris1(){
+	$query 	= "SELECT * FROM tb_inventaris inner join tb_komsarpras on tb_inventaris.id_komsarpras=tb_komsarpras.id_komsarpras inner join tb_sarpras on tb_komsarpras.id_sarpras=tb_sarpras.id_sarpras order by tb_inventaris.id_inventaris desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+	function jumlah_inventaris(){
+	$query 	= "SELECT count(id_inventaris) as jumlah_inventaris FROM tb_inventaris";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+
+// method detail data inventaris
+	function detail_inventaris($id_inventaris){
+	$query 	= "SELECT * FROM tb_inventaris tb_inventaris inner join tb_komsarpras on tb_inventaris.id_komsarpras=tb_komsarpras.id_komsarpras inner join tb_sarpras on tb_komsarpras.id_sarpras=tb_sarpras.id_sarpras where tb_inventaris.id_inventaris='$id_inventaris'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+	
+
+// method hapus data inventaris
+	function delete_inventaris($id_inventaris){
+	$query 	= "DELETE FROM tb_inventaris where id_inventaris='$id_inventaris'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data inventaris
+	function input_inventaris($id_komsarpras,$inventaris,$status){
+	$sql 	= "INSERT INTO tb_inventaris VALUES (NULL,'$id_komsarpras','$inventaris','$status')";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data inventaris
+	function update_inventaris($id_inventaris,$id_komsarpras,$inventaris){
+	$query = "UPDATE tb_inventaris SET 
+									id_komsarpras		='$id_komsarpras',
+									inventaris			='$inventaris'
+									where id_inventaris = '$id_inventaris'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+	// method update data inventaris
+	function status_inventaris($id_inventaris,$status){
+	$query = "UPDATE tb_inventaris SET 
+									status 				='$status'
+									where id_inventaris = '$id_inventaris'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+
+
+//Data inventarisbmn
+// method tampil data inventarisbmn
+	function tampil_inventarisbmn(){
+	$query 	= "SELECT * FROM tb_inventarisbmn order by id_inventarisbmn desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+
+// method detail data inventarisbmn
+	function detail_inventarisbmn($id_inventarisbmn){
+	$query 	= "SELECT * FROM tb_inventarisbmn where id_inventarisbmn='$id_inventarisbmn'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+	
+
+// method hapus data inventarisbmn
+	function delete_inventarisbmn($id_inventarisbmn){
+	$query 	= "DELETE FROM tb_inventarisbmn where id_inventarisbmn='$id_inventarisbmn'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data inventarisbmn
+	function input_inventarisbmn($nama_inventarisbmn,$jumlah,$tahun_pengadaan,$tempat){
+	$sql 	= "INSERT INTO tb_inventarisbmn VALUES (NULL,'$nama_inventarisbmn','$jumlah','$tahun_pengadaan','$tempat')";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data inventarisbmn
+	function update_inventarisbmn($id_inventarisbmn,$nama_inventarisbmn,$jumlah,$tahun_pengadaan,$tempat){
+	$query = "UPDATE tb_inventarisbmn SET 
+									nama_inventarisbmn	='$nama_inventarisbmn',
+									jumlah 				='$jumlah',
+									tahun_pengadaan		='$tahun_pengadaan',
+									tempat				='$tempat'
+									where id_inventarisbmn = '$id_inventarisbmn'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+
+//Data persediaanbmn
+// method tampil data persediaanbmn
+	function tampil_persediaanbmn(){
+	$query 	= "SELECT * FROM tb_persediaanbmn order by id_persediaanbmn desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+
+// method detail data persediaanbmn
+	function detail_persediaanbmn($id_persediaanbmn){
+	$query 	= "SELECT * FROM tb_persediaanbmn where id_persediaanbmn='$id_persediaanbmn'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+	
+
+// method hapus data persediaanbmn
+	function delete_persediaanbmn($id_persediaanbmn){
+	$query 	= "DELETE FROM tb_persediaanbmn where id_persediaanbmn='$id_persediaanbmn'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data persediaanbmn
+	function input_persediaanbmn($kode_barang,$nama_barang,$stok_barang,$ket_barang){
+	$sql 	= "INSERT INTO tb_persediaanbmn VALUES (NULL,'$kode_barang','$nama_barang','$stok_barang','$ket_barang')";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data persediaanbmn
+	function update_persediaanbmn($id_persediaanbmn,$kode_barang,$nama_barang,$stok_barang,$ket_barang){
+	$query = "UPDATE tb_persediaanbmn SET 
+									kode_barang	='$kode_barang',
+									nama_barang ='$nama_barang',
+									stok_barang	='$stok_barang',
+									ket_barang	='$ket_barang'
+									where id_persediaanbmn = '$id_persediaanbmn'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+// method update data persediaanbmn
+	function update_stokpersediaanbmn($id_persediaanbmn,$jumlah){
+	$query = "UPDATE tb_persediaanbmn SET 
+									stok_barang	=(stok_barang-$jumlah)
+									where id_persediaanbmn = '$id_persediaanbmn'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+
+//Data logpersediaanbmn
+// method tampil data logpersediaanbmn
+	function tampil_logpersediaanbmn(){
+	$query 	= "SELECT * FROM tb_logpersediaanbmn inner join tb_persediaanbmn on tb_logpersediaanbmn.id_persediaanbmn=tb_persediaanbmn.id_persediaanbmn order by id_logpersediaanbmn desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+
+// method detail data logpersediaanbmn
+	function detail_logpersediaanbmn($id_logpersediaanbmn){
+	$query 	= "SELECT * FROM tb_logpersediaanbmn inner join tb_persediaanbmn on tb_logpersediaanbmn.id_persediaanbmn=tb_persediaanbmn.id_persediaanbmn where tb_logpersediaanbmn.id_logpersediaanbmn='$id_logpersediaanbmn'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+	
+
+// method hapus data logpersediaanbmn
+	function delete_logpersediaanbmn($id_logpersediaanbmn){
+	$query 	= "DELETE FROM tb_logpersediaanbmn where id_logpersediaanbmn='$id_logpersediaanbmn'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data logpersediaanbmn
+	function input_logpersediaanbmn($id_persediaanbmn,$nama,$jumlah,$kategori,$ket,$tgl){
+	$sql 	= "INSERT INTO tb_logpersediaanbmn VALUES (NULL,'$id_persediaanbmn','$nama','$jumlah','$kategori','$ket','$tgl')";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data logpersediaanbmn
+	function update_logpersediaanbmn($id_logpersediaanbmn,$id_persediaanbmn,$nama,$jumlah,$kategori,$ket,$tgl){
+	$query = "UPDATE tb_logpersediaanbmn SET 
+									id_persediaanbmn	='$id_persediaanbmn',
+									nama 				='$nama',
+									jumlah				='$jumlah',
+									kategori			='$kategori',
+									ket					='$ket',
+									tgl					='$tgl'
+									where id_logpersediaanbmn = '$id_logpersediaanbmn'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+
+
+//Data kamar
+// method tampil data kamar
+	function tampil_kamar($id_komsarpras){
+	$query 	= "SELECT * FROM tb_kamar inner join tb_komsarpras on tb_kamar.id_komsarpras=tb_komsarpras.id_komsarpras inner join tb_sarpras on tb_komsarpras.id_sarpras=tb_sarpras.id_sarpras where tb_kamar.id_komsarpras='$id_komsarpras' order by tb_kamar.id_kamar desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+	function tampil_kamar1(){
+	$query 	= "SELECT * FROM tb_kamar inner join tb_komsarpras on tb_kamar.id_komsarpras=tb_komsarpras.id_komsarpras inner join tb_sarpras on tb_komsarpras.id_sarpras=tb_sarpras.id_sarpras order by tb_kamar.id_kamar desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+	function jumlah_kamar(){
+	$query 	= "SELECT count(id_kamar) as jumlah_kamar FROM tb_kamar";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data kamar
+	function detail_kamar($id_kamar){
+	$query 	= "SELECT * FROM tb_kamar tb_kamar inner join tb_komsarpras on tb_kamar.id_komsarpras=tb_komsarpras.id_komsarpras inner join tb_sarpras on tb_komsarpras.id_sarpras=tb_sarpras.id_sarpras where tb_kamar.id_kamar='$id_kamar'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+	
+
+// method hapus data kamar
+	function delete_kamar($id_kamar){
+	$query 	= "DELETE FROM tb_kamar where id_kamar='$id_kamar'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data kamar
+	function input_kamar($id_komsarpras,$tarif,$kode_kamar,$status){
+	$sql 	= "INSERT INTO tb_kamar VALUES (NULL,'$id_komsarpras','$tarif','$kode_kamar','$status')";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data kamar
+	function update_kamar($id_kamar,$id_komsarpras,$tarif,$kode_kamar,$status){
+	$query = "UPDATE tb_kamar SET 
+									id_komsarpras		='$id_komsarpras',
+									tarif				='$tarif',
+									kode_kamar			='$kamar'
+									where id_kamar = '$id_kamar'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+	// method update data kamar
+	function status_kamar($id_kamar,$status){
+	$query = "UPDATE tb_kamar SET 
+									status 				='$status'
+									where id_kamar = '$id_kamar'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+
+
+//Data ruang
+// method tampil data ruang
+	function tampil_ruang($id_komsarpras){
+	$query 	= "SELECT * FROM tb_ruang inner join tb_komsarpras on tb_ruang.id_komsarpras=tb_komsarpras.id_komsarpras inner join tb_sarpras on tb_komsarpras.id_sarpras=tb_sarpras.id_sarpras where tb_ruang.id_komsarpras='$id_komsarpras' order by tb_ruang.id_ruang desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+	function tampil_ruang1(){
+	$query 	= "SELECT * FROM tb_ruang inner join tb_komsarpras on tb_ruang.id_komsarpras=tb_komsarpras.id_komsarpras inner join tb_sarpras on tb_komsarpras.id_sarpras=tb_sarpras.id_sarpras order by tb_ruang.id_ruang desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+	function jumlah_ruang(){
+	$query 	= "SELECT count(id_ruang) as jumlah_ruang FROM tb_ruang";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data ruang
+	function detail_ruang($id_ruang){
+	$query 	= "SELECT * FROM tb_ruang tb_ruang inner join tb_komsarpras on tb_ruang.id_komsarpras=tb_komsarpras.id_komsarpras inner join tb_sarpras on tb_komsarpras.id_sarpras=tb_sarpras.id_sarpras where tb_ruang.id_ruang='$id_ruang'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+	
+
+// method hapus data ruang
+	function delete_ruang($id_ruang){
+	$query 	= "DELETE FROM tb_ruang where id_ruang='$id_ruang'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data ruang
+	function input_ruang($id_komsarpras,$ruang,$status){
+	$sql 	= "INSERT INTO tb_ruang VALUES (NULL,'$id_komsarpras','$ruang','$status')";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data ruang
+	function update_ruang($id_ruang,$id_komsarpras,$ruang,$status){
+	$query = "UPDATE tb_ruang SET 
+									id_komsarpras	='$id_komsarpras',
+									nama_ruang			='$ruang'
+									where id_ruang = '$id_ruang'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+	// method update data ruang
+	function status_ruang($id_ruang,$status){
+	$query = "UPDATE tb_ruang SET 
+									status 				='$status'
+									where id_ruang = '$id_ruang'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+
+//Data maintenance
+// method tampil data maintenance
+	function tampil_maintenance(){
+	$query 	= "SELECT * FROM tb_maintenance inner join tb_inventaris on tb_maintenance.id_inventaris=tb_inventaris.id_inventaris inner join tb_komsarpras on tb_inventaris.id_komsarpras=tb_komsarpras.id_komsarpras inner join tb_sarpras on tb_komsarpras.id_sarpras=tb_sarpras.id_sarpras order by tb_maintenance.id_maintenance desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+	function tampil_maintenance1($id_komsarpras){
+	$query 	= "SELECT * FROM tb_maintenance inner join tb_inventaris on tb_maintenance.id_inventaris=tb_inventaris.id_inventaris inner join tb_komsarpras on tb_inventaris.id_komsarpras=tb_komsarpras.id_komsarpras inner join tb_sarpras on tb_komsarpras.id_sarpras=tb_sarpras.id_sarpras where tb_inventaris.id_komsarpras='$id_komsarpras' order by tb_maintenance.id_maintenance desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data maintenance
+	function detail_maintenance($id_maintenance){
+	$query 	= "SELECT * FROM tb_maintenance inner join tb_inventaris on tb_maintenance.id_inventaris=tb_inventaris.id_inventaris inner join tb_komsarpras on tb_inventaris.id_komsarpras=tb_komsarpras.id_komsarpras inner join tb_sarpras on tb_komsarpras.id_sarpras=tb_sarpras.id_sarpras where tb_maintenance.id_maintenance='$id_maintenance'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+	
+
+// method hapus data maintenance
+	function delete_maintenance($id_maintenance){
+	$query 	= "DELETE FROM tb_maintenance where id_maintenance='$id_maintenance'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data maintenance
+	function input_maintenance($id_inventaris,$inven_main,$ket,$tgl){
+	$sql 	= "INSERT INTO tb_maintenance VALUES (NULL,'$id_inventaris','$inven_main','$ket','$tgl',NULL)";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data maintenance
+	function update_maintenance($id_maintenance,$id_inventaris,$inven_main,$ket){
+	$query = "UPDATE tb_maintenance SET 
+									id_inventaris		='$id_inventaris',
+									inven_main			='$inven_main',
+									ket					='$ket'
+									where id_maintenance = '$id_maintenance'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+	function verifikasi_main($id_maintenance,$status,$tgl_selesai){
+	$query = "UPDATE tb_maintenance SET 
+									ket	='$status',
+									tgl_selesai = '$tgl_selesai'
+									where id_maintenance = '$id_maintenance'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+
+
+//Data tamuwisma
+// method tampil data tamuwisma
+	function tampil_tamuwisma(){
+	$query 	= "SELECT * FROM tb_tamuwisma inner join tb_kamar on tb_tamuwisma.id_kamar=tb_kamar.id_kamar inner join tb_komsarpras on tb_kamar.id_komsarpras=tb_komsarpras.id_komsarpras inner join tb_sarpras on tb_komsarpras.id_sarpras=tb_sarpras.id_sarpras order by tb_tamuwisma.id_tamuwisma desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+	function tampil_tamuwisma1($id_komsarpras){
+	$query 	= "SELECT * FROM tb_tamuwisma inner join tb_kamar on tb_tamuwisma.id_kamar=tb_kamar.id_kamar inner join tb_komsarpras on tb_kamar.id_komsarpras=tb_komsarpras.id_komsarpras inner join tb_sarpras on tb_komsarpras.id_sarpras=tb_sarpras.id_sarpras where tb_kamar.id_komsarpras='$id_komsarpras' order by tb_tamuwisma.id_tamuwisma desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+	function tampil_tamuwisma12($id_inventaris){
+	$query 	= "SELECT * FROM tb_tamuwisma inner join tb_kamar on tb_tamuwisma.id_kamar=tb_kamar.id_kamar where tb_kamar.id_kamar='$id_kamar' order by tb_tamuwisma.id_tamuwisma desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data tamuwisma
+	function detail_tamuwisma($id_tamuwisma){
+	$query 	= "SELECT * FROM tb_tamuwisma inner join tb_kamar on tb_tamuwisma.id_kamar=tb_kamar.id_kamar inner join tb_komsarpras on tb_kamar.id_komsarpras=tb_komsarpras.id_komsarpras inner join tb_sarpras on tb_komsarpras.id_sarpras=tb_sarpras.id_sarpras where tb_tamuwisma.id_tamuwisma='$id_tamuwisma'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+	
+
+// method hapus data tamuwisma
+	function delete_tamuwisma($id_tamuwisma){
+	$query 	= "DELETE FROM tb_tamuwisma where id_tamuwisma='$id_tamuwisma'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data tamuwisma
+	function input_tamuwisma($id_inventaris,$nama_tamu,$instansi,$kegiatan,$telepon,$tgl_cekin){
+	$sql 	= "INSERT INTO tb_tamuwisma VALUES (NULL,'$id_inventaris','$nama_tamu','$instansi','$kegiatan','$telepon','$tgl_cekin',NULL)";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data tamuwisma
+	function update_tamuwisma($id_tamuwisma,$id_inventaris,$nama_tamu,$instansi,$kegiatan,$telepon,$tgl_cekin){
+	$query = "UPDATE tb_tamuwisma SET 
+									id_inventaris		='$id_inventaris',
+									nama_tamuwisma		='$nama_tamu',
+									instansi			='$instansi',
+									kegiatan			='$kegiatan',
+									telepon				='$telepon',
+									tgl_cekin			='$tgl_cekin'
+									where id_tamuwisma = '$id_tamuwisma'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+	function verifikasi_tamu($id_tamuwisma,$tgl_cekout){
+	$query = "UPDATE tb_tamuwisma SET 
+									tgl_cekout	='$tgl_cekout'
+									where id_tamuwisma = '$id_tamuwisma'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+
+//Data ppnpn
+// method tampil data ppnpn
+function tampil_ppnpn(){
+	$query 	= "SELECT * FROM tb_ppnpn inner join tb_komsarpras on tb_ppnpn.id_komsarpras=tb_komsarpras.id_komsarpras order by tb_ppnpn.id_ppnpn desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data ppnpn
+	function detail_ppnpn($id_ppnpn){
+	$query 	= "SELECT * FROM tb_ppnpn inner join tb_komsarpras on tb_ppnpn.id_komsarpras=tb_komsarpras.id_komsarpras where tb_ppnpn.id_ppnpn='$id_ppnpn'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+	
+
+// method hapus data ppnpn
+	function delete_ppnpn($id_ppnpn){
+	$query 	= "DELETE FROM tb_ppnpn where id_ppnpn='$id_ppnpn'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data ppnpn
+	function input_ppnpn($nama,$tgl_lahir,$jenis_kelamin,$nik,$alamat,$no_hp,$id_komsarpras,$jabatan_ppnpn,$username,$password,$pass_asli){
+	$sql 	= "INSERT INTO tb_ppnpn VALUES (NULL,'$nama','$tgl_lahir','$alamat','$nik','$jenis_kelamin','$no_hp','$id_komsarpras','$jabatan_ppnpn','$username','$password','$pass_asli',NULL)";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data ppnpn
+	function update_ppnpn($id_ppnpn,$nama,$tgl_lahir,$jenis_kelamin,$nik,$alamat,$no_hp,$id_komsarpras,$jabatan_ppnpn,$username,$password,$pass_asli){
+	$query = "UPDATE tb_ppnpn SET 
+									nama_ppnpn		='$nama',
+									tgl_lahir		='$tgl_lahir',
+									alamat			='$alamat',
+									nik				='$nik',
+									jenis_kelamin	='$jenis_kelamin',
+									no_hp 			='$no_hp',
+									id_komsarpras	='$id_komsarpras',
+									jabatan_ppnpn	='$jabatan_ppnpn',
+									username		='$username',
+									password		='$password',
+									pass_asli		='$pass_asli'
+									where id_ppnpn = '$id_ppnpn'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+//Data jeniscuti
+// method tampil data jeniscuti
+function tampil_jeniscuti(){
+	$query 	= "SELECT * FROM tb_jeniscuti order by 'id_jeniscuti' desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data jeniscuti
+	function detail_jeniscuti($id_jeniscuti){
+	$query 	= "SELECT * FROM tb_jeniscuti where id_jeniscuti='$id_jeniscuti'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+	
+
+// method hapus data jeniscuti
+	function delete_jeniscuti($id_jeniscuti){
+	$query 	= "DELETE FROM tb_jeniscuti where id_jeniscuti='$id_jeniscuti'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data jeniscuti
+	function input_jeniscuti($jenis_cuti){
+	$sql 	= "INSERT INTO tb_jeniscuti VALUES (NULL,'$jenis_cuti')";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data jeniscuti
+	function update_jeniscuti($id_jeniscuti,$jenis_cuti){
+	$query = "UPDATE tb_jeniscuti SET 
+									jenis_cuti	='$jenis_cuti'
+									where id_jeniscuti = '$id_jeniscuti'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+//Data jenisizin
+// method tampil data jenisizin
+function tampil_jenisizin(){
+	$query 	= "SELECT * FROM tb_jenisizin order by 'id_jenisizin' desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data jenisizin
+	function detail_jenisizin($id_jenisizin){
+	$query 	= "SELECT * FROM tb_jenisizin where id_jenisizin='$id_jenisizin'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+	
+
+// method hapus data jenisizin
+	function delete_jenisizin($id_jenisizin){
+	$query 	= "DELETE FROM tb_jenisizin where id_jenisizin='$id_jenisizin'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data jenisizin
+	function input_jenisizin($jenis_izin){
+	$sql 	= "INSERT INTO tb_jenisizin VALUES (NULL,'$jenis_izin')";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data jenisizin
+	function update_jenisizin($id_jenisizin,$jenis_izin){
+	$query = "UPDATE tb_jenisizin SET 
+									jenis_izin	='$jenis_izin'
+									where id_jenisizin = '$id_jenisizin'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+
+//Data pengajuancuti
+// method tampil data pengajuancuti
+function tampil_pengajuancuti(){
+	$query 	= "SELECT * FROM tb_pengajuancuti inner join tb_pegawai on tb_pengajuancuti.id_pegawai=tb_pegawai.id_pegawai inner join tb_jeniscuti on tb_jeniscuti.id_jeniscuti=tb_pengajuancuti.id_jeniscuti order by 'tb_pengajuancuti.id_pengajuancuti' desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+function tampil_pengajuancuti2(){
+	$query 	= "SELECT * FROM tb_pengajuancuti inner join tb_pegawai on tb_pengajuancuti.id_pegawai=tb_pegawai.id_pegawai inner join tb_jeniscuti on tb_jeniscuti.id_jeniscuti=tb_pengajuancuti.id_jeniscuti where tb_pengajuancuti.status='Verifikasi' order by tb_pengajuancuti.id_pengajuancuti desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+function tampil_pengajuancuti3(){
+	$query 	= "SELECT * FROM tb_pengajuancuti inner join tb_pegawai on tb_pengajuancuti.id_pegawai=tb_pegawai.id_pegawai inner join tb_jeniscuti on tb_jeniscuti.id_jeniscuti=tb_pengajuancuti.id_jeniscuti where tb_pengajuancuti.status='Pending' order by tb_pengajuancuti.id_pengajuancuti desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data pengajuancuti
+	function detail_pengajuancuti($id_pengajuancuti){
+	$query 	= "SELECT * FROM tb_pengajuancuti inner join tb_pegawai on tb_pengajuancuti.id_pegawai=tb_pegawai.id_pegawai inner join tb_jeniscuti on tb_jeniscuti.id_jeniscuti=tb_pengajuancuti.id_jeniscuti where tb_pengajuancuti.id_pengajuancuti='$id_pengajuancuti'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data pengajuancuti
+	function detail_pengajuancuti1($id){
+	$query 	= "SELECT * FROM tb_pengajuancuti inner join tb_pegawai on tb_pengajuancuti.id_pegawai=tb_pegawai.id_pegawai inner join tb_jeniscuti on tb_jeniscuti.id_jeniscuti=tb_pengajuancuti.id_jeniscuti where tb_pengajuancuti.id_pegawai='$id'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+	
+
+// method hapus data pengajuancuti
+	function delete_pengajuancuti($id_pengajuancuti){
+	$query 	= "DELETE FROM tb_pengajuancuti where id_pengajuancuti='$id_pengajuancuti'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data pengajuancuti
+	function input_pengajuancuti($id_pegawai,$id_jeniscuti,$alasan_cuti,$awal_cuti,$lama_cuti,$catatan_cuti,$alamat_cuti,$status,$tgl){
+	$sql 	= "INSERT INTO tb_pengajuancuti VALUES (NULL,'$id_pegawai','$id_jeniscuti','$alasan_cuti','$awal_cuti','$lama_cuti','$catatan_cuti','$alamat_cuti',NULL,NULL,'$status','$tgl')";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data pengajuancuti
+	function update_pengajuancuti($id_pengajuancuti,$id_pegawai,$id_jeniscuti,$alasan_cuti,$awal_cuti,$lama_cuti,$catatan_cuti,$alamat_cuti){
+	$query = "UPDATE tb_pengajuancuti SET 
+									id_pegawai			='$id_pegawai',
+									id_jeniscuti		='$id_jeniscuti',
+									alasan_cuti			='$alasan_cuti',
+									tanggal_cuti		='$awal_cuti',
+									lama_cuti			='$lama_cuti',
+									catatan_cuti		='$catatan_cuti',
+									alamat_cuti			='$alamat_cuti'
+									where id_pengajuancuti = '$id_pengajuancuti'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+	function update_cuti($id_pengajuancuti,$keputusan_pejabat){
+	$query = "UPDATE tb_pengajuancuti SET 
+									keputusan_pejabat	='$keputusan_pejabat'
+									where id_pengajuancuti = '$id_pengajuancuti'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+	function update_cuti1($id_pengajuancuti,$pertimbangan_atasan){
+	$query = "UPDATE tb_pengajuancuti SET 
+									pertimbangan_atasan	='$pertimbangan_atasan'
+									where id_pengajuancuti = '$id_pengajuancuti'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+	function update_cuti2($id_pengajuancuti,$lama_cuti){
+	$query = "UPDATE tb_pengajuancuti SET 
+									lama_cuti	='$lama_cuti'
+									where id_pengajuancuti = '$id_pengajuancuti'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+	function verifikasi_cuti($id_pengajuancuti,$status){
+	$query = "UPDATE tb_pengajuancuti SET 
+									status	='$status'
+									where id_pengajuancuti = '$id_pengajuancuti'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+
+//Data pengajuanizin
+// method tampil data pengajuanizin
+function tampil_pengajuanizin(){
+	$query 	= "SELECT * FROM tb_pengajuanizin inner join tb_pegawai on tb_pengajuanizin.id_pegawai=tb_pegawai.id_pegawai inner join tb_jenisizin on tb_jenisizin.id_jenisizin=tb_pengajuanizin.id_jenisizin order by tb_pengajuanizin.id_pengajuanizin desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+
+// method detail data pengajuanizin
+	function detail_pengajuanizin($id_pengajuanizin){
+	$query 	= "SELECT * FROM tb_pengajuanizin inner join tb_pegawai on tb_pengajuanizin.id_pegawai=tb_pegawai.id_pegawai inner join tb_jenisizin on tb_jenisizin.id_jenisizin=tb_pengajuanizin.id_jenisizin where tb_pengajuanizin.id_pengajuanizin='$id_pengajuanizin'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data pengajuanizin
+	function detail_pengajuanizin1($id){
+	$query 	= "SELECT * FROM tb_pengajuanizin inner join tb_pegawai on tb_pengajuanizin.id_pegawai=tb_pegawai.id_pegawai inner join tb_jenisizin on tb_jenisizin.id_jenisizin=tb_pengajuanizin.id_jenisizin where tb_pengajuanizin.id_pegawai='$id'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method hapus data pengajuanizin
+	function delete_pengajuanizin($id_pengajuanizin){
+	$query 	= "DELETE FROM tb_pengajuanizin where id_pengajuanizin='$id_pengajuanizin'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data pengajuanizin
+	function input_pengajuanizin($id_pegawai,$id_jenisizin,$tanggal,$mulai,$sampai,$tempat,$alasan,$lama,$status){
+	$sql 	= "INSERT INTO tb_pengajuanizin VALUES (NULL,'$id_pegawai','$id_jenisizin','$tanggal','$mulai','$sampai','$tempat','$alasan','$lama','$status')";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data pengajuanizin
+	function update_pengajuanizin($id_pengajuanizin,$id_pegawai,$id_jenisizin,$tanggal,$mulai,$tempat,$alasan,$lama,$status){
+	$query = "UPDATE tb_pengajuanizin SET 
+									id_pegawai			='$id_pegawai',
+									id_jenisizin		='$id_jenisizin'
+									tanggal 			='$tanggal',
+									mulai				='$mulai',
+									sampai				='$sampai',
+									tempat				='$tempat',
+									alasan				='$alasan',
+									lama				='$lama'
+									where id_pengajuanizin = '$id_pengajuanizin'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+
+	function verifikasi_izin($id_pengajuanizin,$status){
+	$query = "UPDATE tb_pengajuanizin SET 
+									status	='$status'
+									where id_pengajuanizin = '$id_pengajuanizin'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+
+
+
+//Data pengajuanizinppnpn
+// method tampil data pengajuanizinppnpn
+function tampil_pengajuanizinppnpn(){
+	$query 	= "SELECT * FROM tb_pengajuanizinppnpn inner join tb_ppnpn on tb_pengajuanizinppnpn.id_ppnpn=tb_ppnpn.id_ppnpn inner join tb_jenisizin on tb_jenisizin.id_jenisizin=tb_pengajuanizinppnpn.id_jenisizin order by tb_pengajuanizinppnpn.id_pengajuanizinppnpn desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data pengajuanizinppnpn
+	function detail_pengajuanizinppnpn($id_pengajuanizinppnpn){
+	$query 	= "SELECT * FROM tb_pengajuanizinppnpn inner join tb_ppnpn on tb_pengajuanizinppnpn.id_ppnpn=tb_ppnpn.id_ppnpn inner join tb_jenisizin on tb_jenisizin.id_jenisizin=tb_pengajuanizinppnpn.id_jenisizin where tb_pengajuanizinppnpn.id_pengajuanizinppnpn='$id_pengajuanizinppnpn'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data pengajuanizinppnpn
+	function detail_pengajuanizinppnpn1($id){
+	$query 	= "SELECT * FROM tb_pengajuanizinppnpn inner join tb_ppnpn on tb_pengajuanizinppnpn.id_ppnpn=tb_ppnpn.id_ppnpn inner join tb_jenisizin on tb_jenisizin.id_jenisizin=tb_pengajuanizinppnpn.id_jenisizin where tb_pengajuanizinppnpn.id_ppnpn='$id'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method hapus data pengajuanizinppnpn
+	function delete_pengajuanizinppnpn($id_pengajuanizinppnpn){
+	$query 	= "DELETE FROM tb_pengajuanizinppnpn where id_pengajuanizinppnpn='$id_pengajuanizinppnpn'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data pengajuanizinppnpn
+	function input_pengajuanizinppnpn($id_ppnpn,$id_jenisizin,$tanggal,$mulai,$sampai,$tempat,$alasan,$lama,$status){
+	$sql 	= "INSERT INTO tb_pengajuanizinppnpn VALUES (NULL,'$id_pengajuanizinppnpn','$id_jenisizin','$tanggal','$mulai','$sampai','$tempat','$alasan','$lama','$status')";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data pengajuanizinppnpn
+	function update_pengajuanizinppnpn($id_pengajuanizinppnpn,$id_pegawai,$id_jenisizin,$tanggal,$mulai,$tempat,$alasan,$lama,$status){
+	$query = "UPDATE tb_pengajuanizinppnpn SET 
+									id_ppnpn			='$id_pegawai',
+									id_jenisizin		='$id_jenisizin',
+									tanggal 			='$tanggal',
+									mulai				='$mulai',
+									sampai				='$sampai',
+									tempat				='$tempat',
+									alasan				='$alasan',
+									lama				='$lama'
+									where id_pengajuanizinppnpn = '$id_pengajuanizinppnpn'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+
+	function verifikasi_izinppnpn($id_pengajuanizinppnpn,$status){
+	$query = "UPDATE tb_pengajuanizinppnpn SET 
+									status	='$status'
+									where id_pengajuanizinppnpn = '$id_pengajuanizinppnpn'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+
+//Data kegiatanpegawai
+// method tampil data kegiatanpegawai
+function tampil_kegiatanpegawai(){
+	$query 	= "SELECT * FROM tb_kegiatanpegawai inner join tb_pegawai on tb_kegiatanpegawai.id_pegawai=tb_pegawai.id_pegawai order by tb_kegiatanpegawai.id_kegiatanpegawai desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+//Data kegiatanpegawai
+// method tampil data kegiatanpegawai
+function notif_kegiatanpegawai($id_admin){
+	$query 	= "SELECT * FROM tb_kegiatanpegawai inner join tb_pegawai on tb_kegiatanpegawai.id_pegawai=tb_pegawai.id_pegawai where tb_kegiatanpegawai.catatan!='' and  tb_kegiatanpegawai.id_pegawai='$id_admin' order by tb_kegiatanpegawai.id_kegiatanpegawai desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data kegiatanpegawai
+	function detail_kegiatanpegawai($id_kegiatanpegawai){
+	$query 	= "SELECT * FROM tb_kegiatanpegawai inner join tb_pegawai on tb_kegiatanpegawai.id_pegawai=tb_pegawai.id_pegawai where tb_kegiatanpegawai.id_kegiatanpegawai='$id_kegiatanpegawai'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data kegiatanpegawai
+	function detail_kegiatanpegawai1($id){
+	$query 	= "SELECT * FROM tb_kegiatanpegawai inner join tb_pegawai on tb_kegiatanpegawai.id_pegawai=tb_pegawai.id_pegawai where tb_kegiatanpegawai.id_pegawai='$id'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+	
+
+// method hapus data kegiatanpegawai
+	function delete_kegiatanpegawai($id_kegiatanpegawai){
+	$query 	= "DELETE FROM tb_kegiatanpegawai where id_kegiatanpegawai='$id_kegiatanpegawai'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data kegiatanpegawai
+	function input_kegiatanpegawai($id_pegawai,$nama_kegiatan,$jenis_kegiatan,$penyelenggara,$tempat_pelaksanaan,$mulai,$sampai,$ringkasan,$saran,$file,$bill_hotel,$tiket,$sppd,$status,$tgl){
+	$sql 	= "INSERT INTO tb_kegiatanpegawai VALUES (NULL,'$id_pegawai','$nama_kegiatan','$jenis_kegiatan','$penyelenggara','$tempat_pelaksanaan','$mulai','$sampai','$ringkasan','$saran','$file','$bill_hotel','$tiket','$sppd','$status',NULL,'$tgl')";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data kegiatanpegawai
+	function update_kegiatanpegawai($id_kegiatanpegawai,$id_pegawai,$nama_kegiatan,$jenis_kegiatan,$penyelenggara,$tempat_pelaksanaan,$mulai,$sampai,$ringkasan,$saran,$file,$bill_hotel,$tiket,$sppd,$status,$tgl){
+	$query = "UPDATE tb_kegiatanpegawai SET 
+									id_pegawai			='$id_pegawai',
+									nama_kegiatan		='$nama_kegiatan',
+									jenis_kegiatan		='$jenis_kegiatan',
+									penyelenggara		='$penyelenggara',
+									tempat_pelaksanaan	='$tempat_pelaksanaan',
+									mulai				='$mulai',
+									sampai				='$sampai',
+									ringkasan			='$ringkasan',
+									saran				='$saran',
+									file 				='$file',
+									bill_hotel			='$bill_hotel',
+									tiket 				='$tiket',
+									sppd 				='$sppd',
+									status				='$status',
+									tgl_input			='$tgl'
+									where id_kegiatanpegawai = '$id_kegiatanpegawai'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+	function verifikasi_kegiatanpegawai($id_kegiatanpegawai,$status){
+	$query = "UPDATE tb_kegiatanpegawai SET 
+									status	='$status'
+									where id_kegiatanpegawai = '$id_kegiatanpegawai'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+	function catatan_kegiatanpegawai($id_kegiatanpegawai,$catatan){
+	$query = "UPDATE tb_kegiatanpegawai SET 
+									catatan	='$catatan'
+									where id_kegiatanpegawai = '$id_kegiatanpegawai'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+
+//Data kegiatanlembaga
+// method tampil data kegiatanlembaga
+function tampil_kegiatanlembaga(){
+	$query 	= "SELECT * FROM tb_kegiatanlembaga order by id_kegiatanlembaga desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+function lembaga_mingguini(){
+	$tgl = date("2021-09-10");
+	$query 	= "SELECT * FROM tb_kegiatanlembaga where MONTH(mulai) = MONTH('$tgl') order by mulai asc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data kegiatanlembaga
+	function detail_kegiatanlembaga($id_kegiatanlembaga){
+	$query 	= "SELECT * FROM tb_kegiatanlembaga where id_kegiatanlembaga='$id_kegiatanlembaga'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+	
+
+// method hapus data kegiatanlembaga
+	function delete_kegiatanlembaga($id_kegiatanlembaga){
+	$query 	= "DELETE FROM tb_kegiatanlembaga where id_kegiatanlembaga='$id_kegiatanlembaga'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data kegiatanlembaga
+	function input_kegiatanlembaga($nama_kegiatan,$penanggung_jawab,$no_sk,$tanggal_sk,$no_suratlpmp,$tgl_suratlpmp,$eksternal,$tempat_kegiatan,$mulai,$sampai,$unsur_peserta,$jumlah_peserta,$unsur_panitia,$jumlah_panitia,$narasumber,$struktur_program,$kendala_permasalahan,$solusi,$rencana_lanjut,$rekomendasi,$sumber_anggaran,$tgl,$id_admin){
+	$sql 	= "INSERT INTO tb_kegiatanlembaga VALUES (NULL,'$nama_kegiatan','$penanggung_jawab','$no_sk','$tanggal_sk','$no_suratlpmp','$tgl_suratlpmp','$eksternal','$tempat_kegiatan','$mulai','$sampai','$unsur_peserta','$jumlah_peserta','$unsur_panitia','$jumlah_panitia','$narasumber','$struktur_program','$kendala_permasalahan','$solusi','$rencana_lanjut','$rekomendasi','$sumber_anggaran','$tgl','$id_admin')";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data kegiatanlembaga
+	function update_kegiatanlembaga($id_kegiatanlembaga,$nama_kegiatan,$penanggung_jawab,$no_sk,$tanggal_sk,$no_suratlpmp,$tgl_suratlpmp,$eksternal,$tempat_kegiatan,$mulai,$sampai,$unsur_peserta,$jumlah_peserta,$unsur_panitia,$jumlah_panitia,$narasumber,$struktur_program,$kendala_permasalahan,$solusi,$rencana_lanjut,$rekomendasi,$sumber_anggaran,$tgl,$id_admin){
+	$query = "UPDATE tb_kegiatanlembaga SET 
+									nama_kegiatan		='$nama_kegiatan',
+									penanggung_jawab	='$penanggung_jawab',
+									no_sk				='$no_sk',
+									tanggal_sk			='$tanggal_sk',
+									no_suratlpmp		='$no_suratlpmp',
+									tgl_suratlpmp		='$tgl_suratlpmp',
+									surattugas_eksternal			='$eksternal',
+									tempat_kegiatan		='$tempat_kegiatan',
+									mulai 				='$mulai',
+									sampai 				='$sampai',
+									unsur_peserta		='$unsur_peserta',
+									jumlah_peserta		='$jumlah_peserta',
+									unsur_panitia		='$unsur_panitia',
+									jumlah_panitia		='$jumlah_panitia',
+									unsurjenis_narasumber 			='$narasumber',
+									struktur_program	='$struktur_program',
+									kendala_permasalahan='$kendala_permasalahan',
+									solusi				='$solusi',
+									rencana_lanjut		='$rencana_lanjut',
+									rekomendasi			='$rekomendasi',
+									sumber_anggaran		='$sumber_anggaran',
+									tgl_input			='$tgl',
+									id_admin			='$id_admin'
+									where id_kegiatanlembaga = '$id_kegiatanlembaga'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+
+//Data peminjaman
+// method tampil data peminjaman
+function tampil_peminjaman(){
+	$query 	= "SELECT *, (SELECT GROUP_CONCAT(CONCAT(tb_komsarpras.nama_komsarpras) SEPARATOR ', ') from tb_peminjamandetail left join tb_komsarpras on tb_peminjamandetail.id_komsarpras=tb_komsarpras.id_komsarpras where tb_peminjamandetail.id_bukutamu=tb_peminjaman.id_bukutamu) as sarpras, (select nama_tamu from tb_tamu inner join tb_bukutamu on tb_tamu.id_tamu=tb_bukutamu.id_tamu where tb_bukutamu.id_bukutamu=tb_peminjaman.id_bukutamu) as nama_tamu, (select no_telp from tb_tamu inner join tb_bukutamu on tb_tamu.id_tamu=tb_bukutamu.id_tamu where tb_bukutamu.id_bukutamu=tb_peminjaman.id_bukutamu) as no_telp FROM tb_peminjaman order by tb_peminjaman.id_peminjaman desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method tampil data peminjaman
+function tampil_peminjaman12($id_komsarpras){
+	$query 	= "SELECT *, (SELECT tb_komsarpras.nama_komsarpras from tb_komsarpras where tb_komsarpras.id_komsarpras='$id_komsarpras') as sarpras, (select nama_tamu from tb_tamu inner join tb_bukutamu on tb_tamu.id_tamu=tb_bukutamu.id_tamu where tb_bukutamu.id_bukutamu=tb_peminjaman.id_bukutamu) as nama_tamu, (select no_telp from tb_tamu inner join tb_bukutamu on tb_tamu.id_tamu=tb_bukutamu.id_tamu where tb_bukutamu.id_bukutamu=tb_peminjaman.id_bukutamu) as no_telp FROM tb_peminjaman inner join tb_peminjamandetail on tb_peminjaman.id_bukutamu=tb_peminjamandetail.id_bukutamu where tb_peminjamandetail.id_komsarpras='$id_komsarpras' order by tb_peminjaman.id_peminjaman desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+function peminjaman_hariini(){
+	$tgl = date("Y-m-d");
+	$query 	= "SELECT *, (SELECT GROUP_CONCAT(CONCAT(tb_komsarpras.nama_komsarpras) SEPARATOR ', ') from tb_peminjamandetail left join tb_komsarpras on tb_peminjamandetail.id_komsarpras=tb_komsarpras.id_komsarpras where tb_peminjamandetail.id_bukutamu=tb_peminjaman.id_bukutamu) as sarpras FROM tb_peminjaman inner join tb_bukutamu on tb_peminjaman.id_bukutamu=tb_bukutamu.id_bukutamu inner join tb_tamu on tb_bukutamu.id_tamu=tb_tamu.id_tamu where '$tgl' between CAST(tb_peminjaman.mulai AS DATE) and CAST(tb_peminjaman.sampai AS DATE) or '$tgl' between CAST(tb_peminjaman.mulai AS DATE) and CAST(tb_peminjaman.sampai AS DATE) or tb_peminjaman.sampai=CAST($tgl AS DATE) or tb_peminjaman.mulai=CAST($tgl AS DATE) order by tb_peminjaman.id_peminjaman desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+function peminjaman_mingguini(){
+	$tgl = date("Y-m-d");
+	$query 	= "SELECT *, (SELECT GROUP_CONCAT(CONCAT(tb_komsarpras.nama_komsarpras) SEPARATOR ', ') from tb_peminjamandetail left join tb_komsarpras on tb_peminjamandetail.id_komsarpras=tb_komsarpras.id_komsarpras where tb_peminjamandetail.id_bukutamu=tb_peminjaman.id_bukutamu) as sarpras, (select instansi from tb_tamu inner join tb_bukutamu on tb_tamu.id_tamu=tb_bukutamu.id_tamu where tb_bukutamu.id_bukutamu=tb_peminjaman.id_bukutamu) as instansi FROM tb_peminjaman where MONTH(tb_peminjaman.mulai) = MONTH('$tgl') order by tb_peminjaman.mulai asc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+
+// method detail data peminjaman
+	function detail_peminjaman($id_peminjaman){
+	$query 	= "SELECT *, (SELECT GROUP_CONCAT(CONCAT(tb_komsarpras.nama_komsarpras) SEPARATOR ',') from tb_peminjamandetail left join tb_komsarpras on tb_peminjamandetail.id_komsarpras=tb_komsarpras.id_komsarpras where tb_peminjamandetail.id_bukutamu=tb_peminjaman.id_bukutamu) as sarpras FROM tb_peminjaman inner join tb_bukutamu on tb_peminjaman.id_bukutamu=tb_bukutamu.id_bukutamu inner join tb_tamu on tb_bukutamu.id_tamu=tb_tamu.id_tamu where tb_peminjaman.id_peminjaman='$id_peminjaman'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+
+// method hapus data peminjaman
+	function delete_peminjaman($id_peminjaman){
+	$query 	= "DELETE FROM tb_peminjaman where id_peminjaman='$id_peminjaman'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data peminjaman
+	function input_peminjaman($id_bukutamu,$kegiatan,$mulai,$sampai,$konsumsi,$jumlah_panitia,$jumlah_peserta,$status,$tgl){
+	$sql 	= "INSERT INTO tb_peminjaman VALUES (NULL,'$id_bukutamu','$kegiatan','$mulai','$sampai','$konsumsi','$jumlah_panitia','$jumlah_peserta','$status','$tgl',NULL)";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data peminjaman
+	function update_peminjaman($id_peminjaman,$id_bukutamu,$kegiatan,$mulai,$sampai,$konsumsi,$jumlah_panitia,$jumlah_peserta,$status,$tgl){
+	$query = "UPDATE tb_peminjaman SET 
+									id_bukutamu			='$id_bukutamu',
+									kegiatan			='$kegiatan',
+									mulai				='$mulai',
+									sampai				='$sampai',
+									konsumsi			='$konsumsi',
+									jumlah_panitia		='$jumlah_panitia',
+									jumlah_peserta		='$jumlah_peserta',
+									status_peminjaman   ='$status',
+									tgl_diperbarui		='$tgl'
+									where id_peminjaman = '$id_peminjaman'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+
+//Data peminjamandetail
+// method tampil data peminjamandetail
+function tampil_peminjamandetail($id_bukutamu){
+	$query 	= "SELECT * FROM tb_peminjamandetail inner join tb_peminjaman on tb_peminjamandetail.id_bukutamu=tb_peminjaman.id_bukutamu inner join tb_komsarpras on tb_peminjamandetail.id_komsarpras=tb_komsarpras.id_komsarpras where tb_peminjamandetail.id_bukutamu='$id_bukutamu'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data peminjamandetail
+	function detail_peminjamandetail($id_peminjamandetail){
+	$query 	= "SELECT * FROM tb_peminjamandetail inner join tb_peminjaman on tb_peminjamandetail.id_bukutamu=tb_peminjaman.id_bukutamu
+	 where tb_peminjamandetail.id_peminjamandetail='$id_peminjamandetail'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+
+// method hapus data peminjamandetail
+	function delete_peminjamandetail($id_bukutamu){
+	$query 	= "DELETE FROM tb_peminjamandetail where id_bukutamu='$id_bukutamu'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data peminjamandetail
+	function input_peminjamandetail($id_bukutamu,$id_komsarpras,$tgl_peminjamandetail){
+	$sql 	= "INSERT INTO tb_peminjamandetail VALUES (NULL,'$id_bukutamu','$id_komsarpras','$tgl_peminjamandetail')";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data peminjamandetail
+	function update_peminjamandetail($id_peminjamandetail,$id_bukutamu,$id_komsarpras){
+	$query = "UPDATE tb_peminjamandetail SET 
+									id_bukutamu			='$id_bukutamu',
+									id_komsarpras		='$id_komsarpras'
+									where id_peminjamandetail = '$id_peminjamandetail'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+
+
+//Data peminjamanbmn
+// method tampil data peminjamanbmn
+function tampil_peminjamanbmn(){
+	$query 	= "SELECT *, (SELECT GROUP_CONCAT(CONCAT(tb_komsarpras.nama_komsarpras) SEPARATOR ', ') from tb_peminjamandetail left join tb_komsarpras on tb_peminjamandetail.id_komsarpras=tb_komsarpras.id_komsarpras where tb_peminjamandetail.id_bukutamu=tb_peminjamanbmn.id_bukutamu) as sarpras, (select nama_tamu from tb_tamu inner join tb_bukutamu on tb_tamu.id_tamu=tb_bukutamu.id_tamu where tb_bukutamu.id_bukutamu=tb_peminjamanbmn.id_bukutamu) as nama_tamu, (select no_telp from tb_tamu inner join tb_bukutamu on tb_tamu.id_tamu=tb_bukutamu.id_tamu where tb_bukutamu.id_bukutamu=tb_peminjamanbmn.id_bukutamu) as no_telp FROM tb_peminjamanbmn inner join tb_bukutamu on tb_peminjamanbmn.id_bukutamu=tb_bukutamu.id_bukutamu order by tb_peminjamanbmn.id_peminjamanbmn desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data peminjamanbmn
+	function detail_peminjamanbmn($id_peminjamanbmn){
+	$query 	= "SELECT *, (SELECT GROUP_CONCAT(CONCAT(tb_komsarpras.id_komsarpras) SEPARATOR ',') from tb_peminjamandetail left join tb_komsarpras on tb_peminjamandetail.id_komsarpras=tb_komsarpras.id_komsarpras where tb_peminjamandetail.id_bukutamu=tb_peminjamanbmn.id_bukutamu) as sarpras FROM tb_peminjamanbmn inner join tb_bukutamu on tb_peminjamanbmn.id_bukutamu=tb_bukutamu.id_bukutamu inner join tb_tamu on tb_bukutamu.id_tamu=tb_tamu.id_tamu where tb_peminjamanbmn.id_peminjamanbmn='$id_peminjamanbmn'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+
+// method hapus data peminjamanbmn
+	function delete_peminjamanbmn($id_peminjamanbmn){
+	$query 	= "DELETE FROM tb_peminjamanbmn where id_peminjamanbmn='$id_peminjamanbmn'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data peminjamanbmn
+	function input_peminjamanbmn($id_bukutamu,$penanggung_jawab,$mulai,$sampai,$tujuan,$no_disposisi,$status,$tgl){
+	$sql 	= "INSERT INTO tb_peminjamanbmn VALUES (NULL,'$id_bukutamu','$penanggung_jawab','$mulai','$sampai','$tujuan','$no_disposisi','$status','$tgl',NULL)";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data peminjamanbmn
+	function update_peminjamanbmn($id_peminjamanbmn,$id_bukutamu,$penanggung_jawab,$mulai,$sampai,$tujuan,$no_disposisi,$status,$tgl){
+	$query = "UPDATE tb_peminjamanbmn SET 
+									id_bukutamu			='$id_bukutamu',
+									penanggung_jawab	='$penanggung_jawab',
+									mulai				='$mulai',
+									sampai				='$sampai',
+									tujuan				='$tujuan',
+									no_disposisi		='$no_disposisi',
+									status_bmn   		='$status',
+									tgl_diperbarui		='$tgl'
+									where id_peminjamanbmn = '$id_peminjamanbmn'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+	function verifikasi_bmn($id_peminjamanbmn,$status){
+	$query = "UPDATE tb_peminjamanbmn SET 
+									status_bmn	='$status'
+									where id_peminjamanbmn = '$id_peminjamanbmn'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+	function update_bmn($id_peminjamanbmn,$no_disposisi,$status){
+	$query = "UPDATE tb_peminjamanbmn SET 
+									status_bmn	='$status',
+									no_disposisi	='$no_disposisi'
+									where id_peminjamanbmn = '$id_peminjamanbmn'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+//Data peminjamanidzoom
+// method tampil data peminjamanidzoom
+function tampil_peminjamanidzoom(){
+	$query 	= "SELECT *, (select nama_tamu from tb_tamu inner join tb_bukutamu on tb_tamu.id_tamu=tb_bukutamu.id_tamu where tb_bukutamu.id_bukutamu=tb_peminjamanidzoom.id_bukutamu) as nama_tamu, (select no_telp from tb_tamu inner join tb_bukutamu on tb_tamu.id_tamu=tb_bukutamu.id_tamu where tb_bukutamu.id_bukutamu=tb_peminjamanidzoom.id_bukutamu) as no_telp FROM tb_peminjamanidzoom inner join tb_bukutamu on tb_peminjamanidzoom.id_bukutamu=tb_bukutamu.id_bukutamu order by tb_peminjamanidzoom.id_peminjamanidzoom desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data peminjamanidzoom
+	function detail_peminjamanidzoom($id_peminjamanidzoom){
+	$query 	= "SELECT * FROM tb_peminjamanidzoom inner join tb_bukutamu on tb_peminjamanidzoom.id_bukutamu=tb_bukutamu.id_bukutamu inner join tb_tamu on tb_bukutamu.id_tamu=tb_tamu.id_tamu where tb_peminjamanidzoom.id_peminjamanidzoom='$id_peminjamanidzoom'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+
+// method hapus data peminjamanidzoom
+	function delete_peminjamanidzoom($id_peminjamanidzoom){
+	$query 	= "DELETE FROM tb_peminjamanidzoom where id_peminjamanidzoom='$id_peminjamanidzoom'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data peminjamanidzoom
+	function input_peminjamanidzoom($id_bukutamu,$nama_kegiatan,$tgl_input){
+	$sql 	= "INSERT INTO tb_peminjamanidzoom VALUES (NULL,'$id_bukutamu','$nama_kegiatan','$tgl_input')";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data peminjamanidzoom
+	function update_peminjamanidzoom($id_peminjamanidzoom,$id_bukutamu,$nama_kegiatan,$tgl_input){
+	$query = "UPDATE tb_peminjamanidzoom SET 
+									id_bukutamu			='$id_bukutamu',
+									nama_kegiatan		='$nama_kegiatan',
+									tgl_input			='$tgl_input'
+									where id_peminjamanidzoom = '$id_peminjamanidzoom'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+
+
+//Data kerjasama
+// method tampil data kerjasama
+function tampil_kerjasama(){
+	$query 	= "SELECT * FROM tb_kerjasama inner join tb_bukutamu on tb_kerjasama.id_bukutamu=tb_bukutamu.id_bukutamu inner join tb_tamu on tb_bukutamu.id_tamu=tb_tamu.id_tamu inner join tb_sublayanan on tb_bukutamu.id_sublayanan=tb_sublayanan.id_sublayanan order by tb_kerjasama.id_kerjasama desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data kerjasama
+	function detail_kerjasama($id_kerjasama){
+	$query 	= "SELECT * FROM tb_kerjasama inner join tb_bukutamu on tb_kerjasama.id_bukutamu=tb_bukutamu.id_bukutamu inner join tb_tamu on tb_bukutamu.id_tamu=tb_tamu.id_tamu where tb_kerjasama.id_kerjasama='$id_kerjasama'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+
+// method hapus data kerjasama
+	function delete_kerjasama($id_kerjasama){
+	$query 	= "DELETE FROM tb_kerjasama where id_kerjasama='$id_kerjasama'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data kerjasama
+	function input_kerjasama($id_bukutamu,$kegiatan,$waktu_pelaksanaan,$jumlah_panitia,$jumlah_peserta,$jumlah_narasumber,$jumlah_tamuvip,$status,$tgl){
+	$sql 	= "INSERT INTO tb_kerjasama VALUES (NULL,'$id_bukutamu','$kegiatan','$waktu_pelaksanaan','$jumlah_panitia','$jumlah_peserta','$jumlah_narasumber','$jumlah_tamuvip','$status','$tgl',NULL)";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data kerjasama
+	function update_kerjasama($id_kerjasama,$id_bukutamu,$kegiatan,$waktu_pelaksanaan,$jumlah_panitia,$jumlah_peserta,$jumlah_narasumber,$jumlah_tamuvip,$status,$tgl){
+	$query = "UPDATE tb_kerjasama SET 
+									id_bukutamu			='$id_bukutamu',
+									kegiatan			='$kegiatan',
+									waktu_pelaksanaan	='$waktu_pelaksanaan',
+									jumlah_panitia		='$jumlah_panitia',
+									jumlah_peserta		='$jumlah_peserta',
+									jumlah_narasumber	='$jumlah_narasumber',
+									jumlah_tamuvip		='$jumlah_tamuvip',
+									status_kerjasama   	='$status',
+									tgl_diperbarui		='$tgl'
+									where id_kerjasama = '$id_kerjasama'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+
+//Data layananinfo
+// method tampil data layananinfo
+function tampil_layananinfo(){
+	$query 	= "SELECT * FROM tb_layananinfo inner join tb_bukutamu on tb_layananinfo.id_bukutamu=tb_bukutamu.id_bukutamu inner join tb_tamu on tb_bukutamu.id_tamu=tb_tamu.id_tamu inner join tb_sublayanan on tb_bukutamu.id_sublayanan=tb_sublayanan.id_sublayanan order by 'tb_layananinfo.id_layananinfo' desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data layananinfo
+	function detail_layananinfo($id_layananinfo){
+	$query 	= "SELECT * FROM tb_layananinfo inner join tb_bukutamu on tb_layananinfo.id_bukutamu=tb_bukutamu.id_bukutamu inner join tb_tamu on tb_bukutamu.id_tamu=tb_tamu.id_tamu where tb_layananinfo.id_layananinfo='$id_layananinfo'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+
+// method hapus data layananinfo
+	function delete_layananinfo($id_layananinfo){
+	$query 	= "DELETE FROM tb_layananinfo where id_layananinfo='$id_layananinfo'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data layananinfo
+	function input_layananinfo($id_bukutamu,$permasalahan,$solusi,$status,$tgl){
+	$sql 	= "INSERT INTO tb_layananinfo VALUES (NULL,'$id_bukutamu','$permasalahan','$solusi','$status','$tgl',NULL)";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data layananinfo
+	function update_layananinfo($id_layananinfo,$id_bukutamu,$permasalahan,$solusi,$status,$tgl){
+	$query = "UPDATE tb_layananinfo SET 
+									id_bukutamu			='$id_bukutamu',
+									permasalahan		='$permasalahan',
+									solusi				='$solusi',
+									status_layananinfo  ='$status',
+									tgl_diperbarui		='$tgl'
+									where id_layananinfo = '$id_layananinfo'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+
+//Data pengaduan
+// method tampil data pengaduan
+function tampil_pengaduan(){
+	$query 	= "SELECT * FROM tb_pengaduan inner join tb_bukutamu on tb_pengaduan.id_bukutamu=tb_bukutamu.id_bukutamu inner join tb_tamu on tb_bukutamu.id_tamu=tb_tamu.id_tamu order by 'tb_pengaduan.id_pengaduan' desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data pengaduan
+	function detail_pengaduan($id_pengaduan){
+	$query 	= "SELECT * FROM tb_pengaduan inner join tb_bukutamu on tb_pengaduan.id_bukutamu=tb_bukutamu.id_bukutamu inner join tb_tamu on tb_bukutamu.id_tamu=tb_tamu.id_tamu where tb_pengaduan.id_pengaduan='$id_pengaduan'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+
+// method hapus data pengaduan
+	function delete_pengaduan($id_pengaduan){
+	$query 	= "DELETE FROM tb_pengaduan where id_pengaduan='$id_pengaduan'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data pengaduan
+	function input_pengaduan($no_pendaftaran,$id_bukutamu,$uraian_pengaduan,$instansi_institusi,$tanggapan_petugas,$kelengkapan_berkas,$hasil_pengaduan,$status,$tgl_konfirmasi,$tgl){
+	$sql 	= "INSERT INTO tb_pengaduan VALUES (NULL,'$no_pendaftaran','$id_bukutamu','$uraian_pengaduan','$instansi_institusi','$tanggapan_petugas','$kelengkapan_berkas','$hasil_pengaduan','$status','$tgl_konfirmasi','$tgl')";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data pengaduan
+	function update_pengaduan($id_pengaduan,$no_pendaftaran,$id_bukutamu,$uraian_pengaduan,$instansi_institusi,$tanggapan_petugas,$kelengkapan_berkas,$hasil_pengaduan,$status,$tgl_konfirmasi,$tgl){
+	$query = "UPDATE tb_pengaduan SET 
+									no_pendaftaran		='$no_pendaftaran',
+									id_bukutamu			='$id_bukutamu',
+									uraian_pengaduan	='$uraian_pengaduan',
+									instansi_institusi	='$instansi_institusi',
+									tanggapan_petugas  	='$tanggapan_petugas',
+									kelengkapan_berkas  ='$kelengkapan_berkas',
+									hasil_pengaduan  	='$hasil_pengaduan',
+									status_pengaduan  	='$status',
+									tgl_konfirmasi  	='$tgl_konfirmasi',
+									tgl_pengaduan		='$tgl'
+									where id_pengaduan = '$id_pengaduan'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+// method CEK BUKU TAMU
+	function cek_1($id_bukutamu,$modul){
+	$query 	= "SELECT * FROM tb_"."$modul"." inner join tb_bukutamu on tb_"."$modul".".id_bukutamu=tb_bukutamu.id_bukutamu where tb_"."$modul".".id_bukutamu='$id_bukutamu'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method CEK BUKU TAMU
+	function tampil_berkaspengaduan(){
+	$query 	= "SELECT * FROM tb_berkaspengaduan";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+//Data pos
+// method tampil data pos
+function tampil_pos(){
+	$query 	= "SELECT * FROM tb_pos order by 'id_pos' desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data pos
+	function detail_pos($id_pos){
+	$query 	= "SELECT * FROM tb_pos where id_pos='$id_pos'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+	
+
+// method hapus data pos
+	function delete_pos($id_pos){
+	$query 	= "DELETE FROM tb_pos where id_pos='$id_pos'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data pos
+	function input_pos($jam, $uraian, $ket){
+	$sql 	= "INSERT INTO tb_pos VALUES (NULL,'$jam', '$uraian', '$ket')";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data pos
+	function update_pos($id_pos, $jam, $uraian, $ket){
+	$query = "UPDATE tb_pos SET 
+									jam		='$jam',
+									uraian	='$uraian',
+									ket		='$ket'
+									where id_pos = '$id_pos'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+//Data logpegawai
+// method tampil data logpegawai
+function tampil_logpegawai(){
+	$query 	= "SELECT * FROM tb_logpegawai inner join tb_pegawai on tb_logpegawai.id_pegawai=tb_pegawai.id_pegawai order by tb_logpegawai.id_logpegawai desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+function tampil_logpegawai1($tanggal){
+	$query 	= "SELECT * FROM tb_logpegawai inner join tb_pegawai on tb_logpegawai.id_pegawai=tb_pegawai.id_pegawai where tb_logpegawai.tgl_log='$tanggal' order by tb_logpegawai.id_logpegawai desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data logpegawai
+	function detail_logpegawai($id_logpegawai){
+	$query 	= "SELECT * FROM tb_logpegawai inner join tb_pegawai on tb_logpegawai.id_pegawai=tb_pegawai.id_pegawai where tb_logpegawai.id_logpegawai='$id_logpegawai' ";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+	
+
+// method hapus data logpegawai
+	function delete_logpegawai($id_logpegawai){
+	$query 	= "DELETE FROM tb_logpegawai where id_logpegawai='$id_logpegawai'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data logpegawai
+	function input_logpegawai($id_pegawai,$uraian,$ket,$tgl_log,$jam){
+	$sql 	= "INSERT INTO tb_logpegawai VALUES (NULL,'$id_pegawai','$uraian','$ket','$tgl_log','$jam')";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data logpegawai
+	function update_logpegawai($id_logpegawai,$id_pegawai,$uraian,$ket,$tgl_log,$jam){
+	$query = "UPDATE tb_logpegawai SET 
+									id_pegawai	='$id_pegawai',
+									uraian		='$uraian',
+									catatan			='$ket',
+									tgl_log		='$tgl_log',
+									waktu_log	='$jam'
+									where id_logpegawai = '$id_logpegawai'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+
+
+//Data notifikasi
+// method tampil data notifikasi
+function tampil_notifikasi(){
+	$query 	= "SELECT * FROM tb_notifikasi order by 'id_notifikasi' desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+function tampil_notifikasi1(){
+	$query 	= "SELECT * FROM tb_notifikasi where ket='Aktif' order by id_notifikasi desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data notifikasi
+	function detail_notifikasi($id_notifikasi){
+	$query 	= "SELECT * FROM tb_notifikasi where id_notifikasi='$id_notifikasi'";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+	
+
+// method hapus data notifikasi
+	function delete_notifikasi($id_notifikasi){
+	$query 	= "DELETE FROM tb_notifikasi where id_notifikasi='$id_notifikasi'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data notifikasi
+	function input_notifikasi($notifikasi, $level, $ket){
+	$sql 	= "INSERT INTO tb_notifikasi VALUES (NULL,'$notifikasi', '$level', '$ket')";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data notifikasi
+	function update_notifikasi($id_notifikasi, $notifikasi, $level, $ket){
+	$query = "UPDATE tb_notifikasi SET 
+									notifikasi	='$notifikasi',
+									level		='$level',
+									ket			='$ket'
+									where id_notifikasi = '$id_notifikasi'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+
+//Data kinerja
+// method tampil data kinerja
+function tampil_kinerja(){
+	$query 	= "SELECT * FROM tb_kinerja inner join tb_pegawai on tb_kinerja.id_pegawai=tb_pegawai.id_pegawai order by tb_kinerja.id_kinerja desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method tampil data kinerja
+function tampil_kinerja4($id_pegawai){
+	$query 	= "SELECT * FROM tb_kinerja inner join tb_pegawai on tb_kinerja.id_pegawai=tb_pegawai.id_pegawai where tb_kinerja.id_pegawai='$id_pegawai' order by tb_kinerja.id_kinerja desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+function tampil_kinerja1(){
+	$query 	= "SELECT * FROM tb_kinerja inner join tb_pegawai on tb_kinerja.id_pegawai=tb_pegawai.id_pegawai order by tb_kinerja.id_kinerja desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data kinerja
+	function detail_kinerja($id_kinerja){
+	$query 	= "SELECT * FROM tb_kinerja inner join tb_pegawai on tb_kinerja.id_pegawai=tb_pegawai.id_pegawai where tb_kinerja.id_kinerja='$id_kinerja' ";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+function tampil_kinerjappnpn(){
+	$query 	= "SELECT * FROM tb_kinerja inner join tb_ppnpn on tb_kinerja.id_pegawai=tb_ppnpn.id_ppnpn order by tb_kinerja.id_kinerja desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+
+function tampil_kinerjappnpn4($id_pegawai){
+	$query 	= "SELECT * FROM tb_kinerja inner join tb_ppnpn on tb_kinerja.id_pegawai=tb_ppnpn.id_ppnpn where tb_kinerja.id_pegawai='$id_pegawai' order by tb_kinerja.id_kinerja desc";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+
+// method detail data kinerja
+	function detail_kinerjappnpn($id_kinerja){
+	$query 	= "SELECT * FROM tb_kinerja inner join tb_ppnpn on tb_kinerja.id_pegawai=tb_ppnpn.id_ppnpn where tb_kinerja.id_kinerja='$id_kinerja' ";
+	$result = $this->db->query($query);
+	return $result;	
+	}
+	
+
+// method hapus data kinerja
+	function delete_kinerja($id_kinerja){
+	$query 	= "DELETE FROM tb_kinerja where id_kinerja='$id_kinerja'";
+	$res 	= $this->db->query($query);
+	return $res;
+	}
+
+// method tambah data kinerja
+	function input_kinerja($id_pegawai,$foto_kinerja,$foto_kinerja1,$ket,$tgl_kinerja){
+	$sql 	= "INSERT INTO tb_kinerja VALUES (NULL,'$id_pegawai','$foto_kinerja','$foto_kinerja1','$ket','$tgl_kinerja')";
+	$result = $this->db->query($sql); 
+	return $result;
+	}
+
+
+// method update data kinerja
+	function update_kinerja($id_kinerja,$id_pegawai,$foto_kinerja,$foto_kinerja1,$ket,$tgl_kinerja){
+	$query = "UPDATE tb_kinerja SET 
+									id_pegawai	='$id_pegawai',
+									foto_kinerja='$foto_kinerja',
+									foto_kinerja1='$foto_kinerja1',
+									ket_kinerja	='$ket',
+									tgl_kinerja	='$tgl_kinerja'
+									where id_kinerja = '$id_kinerja'";
+			$res = $this->db->query($query);
+			return $res;
+	}
+
+}
+
+?>
